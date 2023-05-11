@@ -1,5 +1,6 @@
 import 'package:cinneman/cubit/error_cubit.dart';
 import 'package:cinneman/cubit/navigation/navigation_cubit.dart';
+import 'package:cinneman/cubit/navigation/navigation_state.dart';
 import 'package:cinneman/cubit/user/user_cubit.dart';
 import 'package:cinneman/navigation/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -24,25 +25,12 @@ class CinnemanRouterDelegate extends RouterDelegate<RouteConfig>
         _authCubit = authCubit,
         _navigationCubit = navigationCubit,
         _errorCubit = errorCubit,
-        _pageGenerator = pageGenerator {
-    _navigationCubit.stream.listen((_) {
-      notifyListeners();
-    });
-
-    _authCubit.stream.listen((_) {
-      notifyListeners();
-    });
-  }
+        _pageGenerator = pageGenerator;
 
   bool get isAuthenticated => _authCubit.state.isAuthenticated;
 
   @override
   Widget build(BuildContext context) {
-    List<Page> pages = _navigationCubit.state.stack
-        .map((r) => _pageGenerator.createPage(r))
-        .toList();
-
-
     return BlocListener<ErrorCubit, String?>(
       bloc: _errorCubit,
       listener: (context, error) {
@@ -55,17 +43,22 @@ class CinnemanRouterDelegate extends RouterDelegate<RouteConfig>
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         }
       },
-      child: Navigator(
-        key: navigatorKey,
-        pages: pages,
-        onPopPage: (route, result) {
-          if (!route.didPop(result)) {
-            return false;
-          }
+      child: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, state) {
+          return Navigator(
+            key: navigatorKey,
+            pages:
+                state.stack.map((RouteConfig r) => _pageGenerator.createPage(r)).toList(),
+            onPopPage: (route, result) {
+              if (!route.didPop(result)) {
+                return false;
+              }
 
-          _navigationCubit.pop();
+              _navigationCubit.pop();
 
-          return true;
+              return true;
+            },
+          );
         },
       ),
     );
@@ -73,13 +66,11 @@ class CinnemanRouterDelegate extends RouterDelegate<RouteConfig>
 
   @override
   Future<void> setNewRoutePath(RouteConfig configuration) async {
-
     bool requiresAuth = [
       AppRoutes.moviesListPage,
       AppRoutes.movieDetailsPage,
       AppRoutes.paymentPage,
       AppRoutes.userProfile,
-
     ].contains(configuration.route);
 
     if (requiresAuth && !isAuthenticated) {

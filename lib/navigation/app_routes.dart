@@ -1,4 +1,3 @@
-import 'package:cinneman/data/models/movie_session_models.dart';
 import 'package:cinneman/pages/login_screen.dart';
 import 'package:cinneman/pages/movie_details.dart';
 import 'package:cinneman/pages/movies_list.dart';
@@ -33,6 +32,7 @@ class RouteConfig {
 }
 
 class PageGenerator {
+
   Page createPage(RouteConfig config) {
     switch (config.route) {
       case AppRoutes.welcomeScreen:
