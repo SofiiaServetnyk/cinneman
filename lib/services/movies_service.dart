@@ -123,7 +123,7 @@ class MovieService {
     try {
       // Map the seats to their IDs
       List<int> seatIds = seats.map((seat) => seat.id).toList();
-
+    
       final response = await dio.post(
         '$apiUrl/api/movies/buy',
         data: {

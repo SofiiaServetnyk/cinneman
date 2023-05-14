@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
     initializeData() async {
       await userCubit.loadStoredState();
 
-      Future.delayed(const Duration(seconds: 2))
-          .then((_) => navigationCubit.loadInitialNavigation());
+      await Future.delayed(const Duration(seconds: 2));
+      navigationCubit.loadInitialNavigation();
 
       if (userCubit.state.isAuthenticated) {
         try {
