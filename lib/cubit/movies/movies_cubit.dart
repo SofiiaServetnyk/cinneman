@@ -30,40 +30,7 @@ class MoviesCubit extends Cubit<MoviesState> {
         movies: state.movies, movieSession: session, selectedSeats: {}));
   }
 
-  Future<void> updateSession() async {
-    try {
-      MovieSession? movieSession = await movieService.getMovieSessionById(
-          movie: state.movieSession!.movie, sessionId: state.movieSession!.id);
-      if (movieSession != null) {
-        Set<Seat> newSelectedSeats = {};
 
-        for (Seat selectedSeat in state.selectedSeats!) {
-          SeatRow? updatedSeatRow = movieSession.room.rows
-              .firstWhere((row) => row.index == selectedSeat.rowIndex);
-
-          Seat? updatedSeat = updatedSeatRow.seats.firstWhere(
-            (seat) => seat.index == selectedSeat.index,
-          );
-
-          newSelectedSeats.add(updatedSeat);
-        }
-
-        emit(MoviesState(
-            movies: state.movies,
-            movieSession: movieSession,
-            selectedSeats: newSelectedSeats));
-      } else {
-        throw MoviesServiceException("Error updating session data.");
-      }
-    } catch (e) {
-      throw MoviesServiceException("Error updating session data.");
-    }
-  }
-
-  Future<void> clearSession() async {
-    emit(MoviesState(
-        movies: state.movies, movieSession: null, selectedSeats: null));
-  }
 
   Future<void> toggleSeat(Seat seat) async {
     Set<Seat>? seatsSet = state.selectedSeats;
